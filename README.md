@@ -6,12 +6,12 @@
 
 ## O problema
 
-Despachantes autônomos que captam clientes direto operam hoje no caos:
+Quando se lida com grande numero de demandas entregas diarias, é comum esquecer onde está um documento, se esta com cliente, com você, ou se chegou a emiti-lo, principalmente onde é necessario se acompanhar esses detalhes devido ao prazos do detran de vistorias e organizar pagamentos de multas e emplacamentos, tudo isso com uma demanda de 120 veículso por mes, fora os veículos de fora ou atrasado que não foram transferidos, acabam gerando a necessidade de uma gfrstão eficiente para alem de melhor gestão disso tudo, tambem não saturar o proficional autoamtizando processos e gerando mennos estresse de memoria, pois um dos piores momentos é lembrar onde tal processo está ou em que pé está, a alta demanda necessidade de algo alem de uma simples planilha do excel, este projeto viza integrar ao meu corre, trazendo essa gestão completa, abordando todos os aspectos de uma concessionaria que lida com diferentes despachantes, emplacadoras e com pagamentos diarios e cobranças, é necessario no dia a dia ter respostas rapidas e objetivas:
 documentos físicos sem rastreio, prazos perdidos por falta de alerta,
 clientes com saldo em aberto sem visibilidade, e processos travados
-esperando papel que ninguém foi cobrar.
+esperando papel que ninguém foi cobrar, ou não lembra onde está.
 
-**Nenhuma planilha resolve isso. Precisa de sistema.**
+**Uma planilha resolve isso. Mas precisaria de muitas colunas onde nem sempre seriam usadas, Precisa de sistema que se adapte a cada situação, mostrando e filtrando as informações necessarios.**
 
 ---
 
@@ -21,13 +21,13 @@ esperando papel que ninguém foi cobrar.
 
 Cada papel tem uma localização rastreada em tempo real.
 
-| Status               | Significado                                 |
-| -------------------- | ------------------------------------------- |
-| `Com você`           | Na sua posse, com referência (ex: gaveta A) |
-| `No DETRAN`          | Com número de protocolo                     |
-| `No cartório`        | Com data de entrada                         |
-| `Aguardando cliente` | 🚨 Processo bloqueado                       |
-| `Entregue`           | Finalizado                                  |
+| Status                                                        | Significado                                 |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| `Com você`                                                    | Na sua posse, com referência (ex: gaveta A) |
+| `No DETRAN`                                                   | Com número de protocolo                     |
+| `No cartório, com vendedor ou comprador`                      | Com data de entrada                         |
+| `Aguardando cliente, pode ser falta de pagamento ou vistoria` | 🚨 Processo bloqueado                       |
+| `Entregue`                                                    | Finalizado                                  |
 
 ---
 
@@ -99,15 +99,16 @@ no **Meu Corre Financeiro** fecha automaticamente — sem trabalho duplicado.
 
 ## Tipos de serviço cobertos
 
-- Transferência de propriedade
+- Transferência de propriedade (podendo incluir c idade ^ placa ^ estado)
 - 1º emplacamento (veículo 0km)
-- Licenciamento anual
+- Pagamento de Multas
 - Vistoria DETRAN
 - Pagamento de IPVA
 - Regularização de débitos
 - Gravame / alienação fiduciária
 - CRV digital
 - Baixa de veículo
+- Emissão de ATPV
 
 ---
 

@@ -11,7 +11,7 @@ documentos físicos sem rastreio, prazos perdidos por falta de alerta,
 clientes com saldo em aberto sem visibilidade, e processos travados
 esperando papel que ninguém foi cobrar, ou não lembra onde está.
 
-**Uma planilha resolve isso. Mas precisaria de muitas colunas onde nem sempre seriam usadas, Precisa de sistema que se adapte a cada situação, mostrando e filtrando as informações necessarios.**
+**Uma planilha até resolve, mas exigiria dezenas de colunas que nem sempre seriam usadas, se faz necessáŕio um sistema que se adapte a cada situação, mostrando e filtrando as informações necessarios.**
 
 ---
 

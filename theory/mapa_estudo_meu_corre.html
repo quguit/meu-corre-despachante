@@ -1,0 +1,353 @@
+
+<style>
+.c{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.sec{font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px}
+.pill{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-block;margin:2px 2px 0 0}
+.row{display:flex;gap:10px;margin-bottom:10px}
+.block{border-radius:8px;padding:10px 12px;flex:1}
+.dep{font-size:11px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:4px;margin:6px 0 0}
+.chapter{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);align-items:flex-start}
+.chapter:last-child{border-bottom:none}
+.cnum{width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.code{background:var(--color-background-secondary);border-radius:6px;padding:8px 12px;font-family:var(--font-mono);font-size:11px;color:var(--color-text-primary);line-height:1.7;margin:7px 0 4px}
+.vs{display:flex;gap:6px;margin:6px 0 0}
+.vs-b{flex:1;border-radius:6px;padding:7px 10px;font-size:11px}
+.nav-btn{font-size:12px;padding:6px 14px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;margin:0 4px 4px 0}
+.nav-btn.active{background:var(--color-background-interactive-hover);border-color:var(--color-border-interactive)}
+</style>
+
+<h2 class="sr-only">Mapa de estudos personalizado — Meu Corre Despachante</h2>
+<div id="app" style="padding:1rem 0 0">
+
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+  <p style="font-size:22px;font-weight:500;color:var(--color-text-primary);margin:0">Mapa de estudos</p>
+  <span class="pill" style="background:#E1F5EE;color:#085041">nível avançado</span>
+  <span class="pill" style="background:#E6F1FB;color:#0C447C">teoria → código</span>
+</div>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 1.25rem">6 capítulos · cada um termina com código real no projeto</p>
+
+<!-- NAV -->
+<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.25rem" id="nav"></div>
+
+<!-- CONTENT -->
+<div id="content"></div>
+
+</div>
+
+<script>
+const chapters = [
+  {
+    id: 1,
+    label: "Cap 1 — Convenções",
+    color: "#085041", bg: "#E1F5EE", border: "#9FE1CB",
+    title: "Convenções e estilo — PEP 8 + PEP 257",
+    subtitle: "A linguagem tem um estilo oficial. Seu código precisa falar essa língua.",
+    why: "Você já usa decorators e ABC — mas provavelmente mistura estilos. Antes de arquitetura, o código precisa ser legível por qualquer dev Python.",
+    theory: [
+      { topic: "Nomenclatura de variáveis e funções", rule: "snake_case", example: "ordem_servico, calcular_saldo, cliente_id" },
+      { topic: "Classes e tipos", rule: "PascalCase", example: "OrdemServico, ClienteRepository, StatusOS" },
+      { topic: "Constantes", rule: "UPPER_SNAKE_CASE", example: "PRAZO_CRITICO_DIAS = 5" },
+      { topic: "Módulos e arquivos", rule: "snake_case", example: "ordem_servico.py, cliente_repo.py" },
+      { topic: "Métodos privados", rule: "_prefixo", example: "_calcular_total(), __id_interno" },
+      { topic: "Enums", rule: "PascalCase + UPPER membros", example: "class StatusOS(Enum): EM_ANDAMENTO = 'em_andamento'" },
+    ],
+    code: `# ❌ Errado — mistura de estilos
+class ordem_servico:
+    def CalcularSaldo(self, ValorTotal, valorPago):
+        RESULTADO = ValorTotal - valorPago
+        return RESULTADO
+
+# ✅ Correto — PEP 8
+PRAZO_CRITICO_DIAS = 5  # constante: UPPER_SNAKE_CASE
+
+class OrdemServico:           # classe: PascalCase
+    def calcular_saldo(       # método: snake_case
+        self,
+        valor_total: float,   # parâmetro: snake_case
+        valor_pago: float,
+    ) -> float:
+        return valor_total - valor_pago`,
+    entrega: "Criar domain/entities/ordem_servico.py com nomenclatura 100% PEP 8",
+    refs: ["PEP 8", "PEP 257 (docstrings)"]
+  },
+  {
+    id: 2,
+    label: "Cap 2 — SOLID",
+    color: "#0C447C", bg: "#E6F1FB", border: "#85B7EB",
+    title: "SOLID — os 5 princípios aplicados ao projeto",
+    subtitle: "Não são regras abstratas. Cada princípio resolve uma dor de manutenção específica.",
+    why: "Você conhece OOP e ABC — SOLID é o próximo nível: como organizar classes para que mudar uma coisa não quebre outra.",
+    principles: [
+      {
+        name: "S — Single Responsibility",
+        pain: "Classe que faz tudo quebra quando qualquer detalhe muda",
+        rule: "Uma classe, uma razão para mudar",
+        example: "OrdemServico só representa dados. Não salva, não gera PDF, não envia notificação.",
+        bad: "class OrdemServico:\n    def salvar(self): ...     # ❌ responsabilidade do repo\n    def gerar_pdf(self): ... # ❌ responsabilidade do gerador\n    def notificar(self): ... # ❌ responsabilidade do notifier",
+        good: "class OrdemServico:        # só representa o dado\nclass OrdemRepo:           # só persiste\nclass GeradorPDF:          # só gera PDF\nclass AlertaService:       # só notifica"
+      },
+      {
+        name: "O — Open/Closed",
+        pain: "Adicionar funcionalidade obriga a mexer em código que já funciona",
+        rule: "Aberto para extensão, fechado para modificação",
+        example: "Para adicionar novo tipo de serviço, cria nova classe — não mexe na existente.",
+        bad: "def calcular_taxa(tipo):\n    if tipo == 'transferencia': return 350\n    if tipo == 'emplacamento': return 280\n    # ❌ toda vez que surge tipo novo, mexe aqui",
+        good: "class TaxaServico(ABC):\n    @abstractmethod\n    def calcular(self) -> float: ...\n\nclass TaxaTransferencia(TaxaServico):\n    def calcular(self) -> float: return 350.0\n\nclass TaxaEmplacamento(TaxaServico):\n    def calcular(self) -> float: return 280.0"
+      },
+      {
+        name: "L — Liskov Substitution",
+        pain: "Subclasse quebra comportamento esperado pela classe pai",
+        rule: "Subclasse deve poder substituir a classe pai sem surpreesas",
+        example: "SQLiteOrdemRepo e PostgresOrdemRepo são intercambiáveis — mesma interface, comportamento equivalente.",
+        bad: "class PostgresRepo(OrdemRepo):\n    def listar_ativas(self):\n        raise NotImplementedError  # ❌ quebra o contrato",
+        good: "class PostgresRepo(OrdemRepo):\n    def listar_ativas(self) -> list[OrdemServico]:\n        # implementação real — honra o contrato\n        return self.session.query(OrdemServico).all()"
+      },
+      {
+        name: "I — Interface Segregation",
+        pain: "Interface grande força implementar métodos que não fazem sentido",
+        rule: "Interfaces pequenas e específicas, não uma gigante",
+        example: "Repositório de leitura separado do de escrita — o dashboard só precisa ler.",
+        bad: "class OrdemRepo(ABC):\n    def salvar(self): ...\n    def deletar(self): ...\n    def listar(self): ...\n    def gerar_relatorio(self): ... # ❌ mistura responsabilidades",
+        good: "class OrdemRepoLeitura(ABC):\n    def listar_ativas(self): ...\n    def buscar_por_placa(self): ...\n\nclass OrdemRepoEscrita(ABC):\n    def salvar(self): ...\n    def atualizar_status(self): ..."
+      },
+      {
+        name: "D — Dependency Inversion",
+        pain: "Código de alto nível depende de detalhe de implementação — trocar SQLite por Postgres exige reescrever tudo",
+        rule: "Dependa de abstrações, nunca de implementações concretas",
+        example: "O use case recebe OrdemRepo (ABC), não SQLiteOrdemRepo. Pode testar com FakeRepo.",
+        bad: "class ListarCriticas:\n    def __init__(self):\n        self.repo = SQLiteOrdemRepo()  # ❌ acoplado ao SQLite",
+        good: "class ListarCriticas:\n    def __init__(self, repo: OrdemRepoLeitura):  # ✅ abstração\n        self.repo = repo\n    # teste: ListarCriticas(FakeRepo())\n    # prod:  ListarCriticas(SQLiteOrdemRepo())"
+      }
+    ],
+    entrega: "Criar domain/repositories/ordem_repo.py com as ABCs separadas por responsabilidade",
+    refs: ["Clean Code — Robert Martin", "Architecture Patterns with Python"]
+  },
+  {
+    id: 3,
+    label: "Cap 3 — Clean Arch",
+    color: "#3C3489", bg: "#EEEDFE", border: "#AFA9EC",
+    title: "Clean Architecture — as camadas e a regra de dependência",
+    subtitle: "Uma regra só: dependências apontam para dentro. Nunca para fora.",
+    why: "Você já viu o diagrama de pastas. Este capítulo explica o POR QUÊ de cada camada existir e o que nunca pode atravessar a fronteira.",
+    layers: [
+      { name: "Domain (núcleo)", color: "#E1F5EE", border: "#9FE1CB", textColor: "#085041", desc: "Entidades puras. Sem import de SQLAlchemy, PySide6 ou FastAPI. Se um arquivo desta pasta importar algo externo, está errado.", files: "entities/ordem_servico.py · entities/cliente.py · entities/documento.py" },
+      { name: "Use Cases", color: "#E6F1FB", border: "#85B7EB", textColor: "#0C447C", desc: "Orquestram as entidades. Dependem só do domain. Recebem repositório por injeção (DIP). São testáveis sem banco.", files: "listar_ordens_criticas.py · concluir_ordem.py · calcular_saldo_cliente.py" },
+      { name: "Infrastructure", color: "#FAEEDA", border: "#FAC775", textColor: "#412402", desc: "Implementações concretas. SQLAlchemy, arquivos, PDFs. Implementa as ABCs do domain.", files: "sqlite/ordem_repo_sqlite.py · pdf/gerador_pdf.py" },
+      { name: "Presentation", color: "#FCEBEB", border: "#F09595", textColor: "#791F1F", desc: "PySide6 ou Flutter. Chama use cases. Nunca acessa banco diretamente.", files: "pyside6/painel_ordens.py · pyside6/detalhe_os.py" },
+    ],
+    rule: "Domain não importa nada do projeto. Use cases importam só domain. Infrastructure importa domain + libs externas. Presentation importa use cases.",
+    entrega: "Revisar estrutura de pastas e garantir que nenhum import viola a regra de dependência",
+    refs: ["Clean Architecture — Uncle Bob", "Architecture Patterns with Python — Percival & Gregory"]
+  },
+  {
+    id: 4,
+    label: "Cap 4 — Patterns",
+    color: "#633806", bg: "#FAEEDA", border: "#FAC775",
+    title: "Design Patterns aplicados ao projeto",
+    subtitle: "Você já conhece alguns. Agora vamos usá-los onde fazem sentido — não em todo lugar.",
+    why: "Pattern errado no lugar errado cria complexidade desnecessária. Cada pattern abaixo tem uma motivação clara no Meu Corre.",
+    patterns: [
+      { name: "Repository", where: "infrastructure/sqlite/", why: "Isola SQL do resto. Use case não sabe se é SQLite ou Postgres.", when: "Toda vez que precisar persistir uma entidade" },
+      { name: "Factory", where: "infrastructure/factory.py", why: "Cria o grafo de dependências em um lugar só. main.py fica limpo.", when: "Na inicialização da app — monta repo → use case → presenter" },
+      { name: "Observer / Event", where: "use_cases/events/", why: "Quando OS conclui, dispara evento. Financeiro reage. Sem acoplamento.", when: "Integração entre módulos (Despachante → Financeiro)" },
+      { name: "Strategy", where: "domain/services/", why: "Cálculo de taxa varia por tipo de serviço. Cada estratégia encapsula uma regra.", when: "Regras que variam por tipo — taxa, prazo, fluxo de documentos" },
+      { name: "DTO (Data Transfer Object)", where: "use_cases/dtos/", why: "O que a UI recebe não é a entidade bruta. DTO é a fronteira entre camadas.", when: "Sempre que use case retornar dados para a apresentação" },
+    ],
+    entrega: "Implementar Factory para montar o grafo: SQLiteOrdemRepo → ListarCriticas → PainelOrdens",
+    refs: ["Refactoring Guru — padrões com exemplos Python"]
+  },
+  {
+    id: 5,
+    label: "Cap 5 — SQLAlchemy",
+    color: "#27500A", bg: "#EAF3DE", border: "#C0DD97",
+    title: "SQLAlchemy ORM — modelos, sessões e migrations",
+    subtitle: "O ORM é só a implementação do Repository. O domínio não sabe que ele existe.",
+    why: "Você nunca usou SQLAlchemy — é o único conceito novo técnico desta lista. A boa notícia: com Clean Architecture, ele fica isolado numa pasta só.",
+    topics: [
+      { t: "Mapped classes", d: "Como declarar modelos com DeclarativeBase — diferente de entidades de domínio" },
+      { t: "Session e Unit of Work", d: "Como gerenciar transações com context manager — o padrão correto com with session:" },
+      { t: "Relationships", d: "Cliente 1:N OrdemServico · OS 1:N Documento — como declarar e carregar" },
+      { t: "Queries", d: "select(), where(), order_by() — sintaxe moderna do SQLAlchemy 2.0" },
+      { t: "Alembic (migrations)", d: "Versionamento do schema — nunca mais alterar banco na mão" },
+    ],
+    code: `# infrastructure/sqlite/models.py — modelo SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from datetime import date
+
+class Base(DeclarativeBase): pass
+
+class OrdemServicoModel(Base):
+    __tablename__ = "ordens_servico"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    placa: Mapped[str] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(default="recebida")
+    vencimento_vistoria: Mapped[date | None]
+
+# IMPORTANTE: este modelo NÃO é a entidade de domínio
+# O repositório converte Model → Entity ao retornar`,
+    entrega: "Criar todos os models SQLAlchemy e o repositório concreto com as queries das 4 dores",
+    refs: ["Documentação oficial SQLAlchemy 2.0", "Alembic docs"]
+  },
+  {
+    id: 6,
+    label: "Cap 6 — Testes",
+    color: "#791F1F", bg: "#FCEBEB", border: "#F09595",
+    title: "pytest — testar sem banco, sem UI",
+    subtitle: "Se o código é testável, a arquitetura está certa. Se não é, algo está acoplado demais.",
+    why: "Com DIP e Repository Pattern, você pode testar 100% dos use cases sem tocar no banco real. Isso valida que a arquitetura funciona.",
+    code: `# tests/use_cases/test_listar_criticas.py
+from datetime import date, timedelta
+from unittest.mock import MagicMock
+from use_cases.listar_ordens_criticas import ListarOrdensCriticas
+from domain.entities.ordem_servico import OrdemServico, StatusOS
+
+def make_os(dias_para_vencer: int) -> OrdemServico:
+    return OrdemServico(
+        id=1, placa="ABC-1234", cliente_id=1,
+        status=StatusOS.EM_ANDAMENTO,
+        vencimento_vistoria=date.today() + timedelta(days=dias_para_vencer)
+    )
+
+def test_retorna_apenas_os_com_prazo_critico():
+    repo = MagicMock()
+    repo.listar_por_prazo.return_value = [make_os(3)]  # 3 dias → crítico
+
+    uc = ListarOrdensCriticas(repo)
+    resultado = uc.executar(dias=5)
+
+    assert len(resultado) == 1
+    assert resultado[0].placa == "ABC-1234"
+    repo.listar_por_prazo.assert_called_once_with(5)  # verifica contrato`,
+    entrega: "Escrever testes para os 3 use cases principais antes de implementar a UI",
+    refs: ["pytest docs", "unittest.mock — MagicMock e patch"]
+  }
+];
+
+let current = 0;
+
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = chapters.map((ch, i) => 
+    `<button class="nav-btn ${i === current ? 'active' : ''}" onclick="show(${i})">${ch.label}</button>`
+  ).join('');
+}
+
+function renderContent() {
+  const ch = chapters[current];
+  const el = document.getElementById('content');
+
+  let html = `
+    <div class="c" style="border-top:3px solid ${ch.border};margin-bottom:10px">
+      <p class="sec" style="color:${ch.color}">${ch.title}</p>
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px">${ch.subtitle}</p>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 12px">${ch.why}</p>
+  `;
+
+  if (ch.theory) {
+    html += `<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr 120px 1fr;background:var(--color-background-secondary);padding:7px 12px;gap:8px">
+        <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)">Contexto</span>
+        <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)">Padrão</span>
+        <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)">Exemplo no projeto</span>
+      </div>`;
+    ch.theory.forEach(t => {
+      html += `<div style="display:grid;grid-template-columns:1fr 120px 1fr;padding:8px 12px;gap:8px;border-top:0.5px solid var(--color-border-tertiary)">
+        <span style="font-size:12px;color:var(--color-text-secondary)">${t.topic}</span>
+        <code style="font-size:11px;font-weight:500;color:${ch.color};background:${ch.bg};padding:2px 6px;border-radius:4px">${t.rule}</code>
+        <span style="font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono)">${t.example}</span>
+      </div>`;
+    });
+    html += `</div>`;
+    html += `<div class="code" style="margin-top:10px">${ch.code.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>').replace(/ {4}/g,'&nbsp;&nbsp;&nbsp;&nbsp;')}</div>`;
+  }
+
+  if (ch.principles) {
+    ch.principles.forEach(p => {
+      html += `<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <p style="font-size:13px;font-weight:500;color:${ch.color};margin:0 0 2px">${p.name}</p>
+        <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 6px"><strong style="font-weight:500">Dor que resolve:</strong> ${p.pain}</p>
+        <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 6px"><strong style="font-weight:500">Regra:</strong> ${p.rule}</p>
+        <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 6px"><strong style="font-weight:500">No projeto:</strong> ${p.example}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+          <div style="background:#FCEBEB;border-radius:6px;padding:8px 10px"><p style="font-size:10px;font-weight:500;color:#791F1F;margin:0 0 4px">❌ Violação</p><pre style="font-size:10px;color:#A32D2D;margin:0;white-space:pre-wrap;font-family:var(--font-mono)">${p.bad}</pre></div>
+          <div style="background:#E1F5EE;border-radius:6px;padding:8px 10px"><p style="font-size:10px;font-weight:500;color:#085041;margin:0 0 4px">✅ Correto</p><pre style="font-size:10px;color:#0F6E56;margin:0;white-space:pre-wrap;font-family:var(--font-mono)">${p.good}</pre></div>
+        </div>
+      </div>`;
+    });
+  }
+
+  if (ch.layers) {
+    html += `<div style="margin:8px 0">`;
+    ch.layers.forEach((l,i) => {
+      const indent = i * 14;
+      html += `<div style="margin-left:${indent}px;background:${l.color};border:0.5px solid ${l.border};border-radius:8px;padding:9px 12px;margin-bottom:6px">
+        <p style="font-size:12px;font-weight:500;color:${l.textColor};margin:0 0 2px">${l.name}</p>
+        <p style="font-size:11px;color:${l.textColor};margin:0 0 4px;opacity:.85">${l.desc}</p>
+        <code style="font-size:10px;color:${l.textColor};opacity:.7">${l.files}</code>
+      </div>`;
+    });
+    html += `</div>`;
+    html += `<div style="background:var(--color-background-secondary);border-radius:6px;padding:8px 12px;margin-top:4px"><p style="font-size:11px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px">Regra de dependência</p><p style="font-size:11px;color:var(--color-text-secondary);margin:0">${ch.rule}</p></div>`;
+  }
+
+  if (ch.patterns) {
+    html += `<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:120px 1fr 1fr;background:var(--color-background-secondary);padding:7px 12px;gap:8px">
+        <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)">Pattern</span>
+        <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)">Por quê no projeto</span>
+        <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary)">Quando usar</span>
+      </div>`;
+    ch.patterns.forEach(p => {
+      html += `<div style="display:grid;grid-template-columns:120px 1fr 1fr;padding:9px 12px;gap:8px;border-top:0.5px solid var(--color-border-tertiary)">
+        <span style="font-size:12px;font-weight:500;color:${ch.color}">${p.name}</span>
+        <span style="font-size:11px;color:var(--color-text-secondary)">${p.why}</span>
+        <span style="font-size:11px;color:var(--color-text-secondary)">${p.when}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (ch.topics) {
+    ch.topics.forEach(t => {
+      html += `<div style="background:var(--color-background-secondary);border-radius:6px;padding:8px 12px;margin-bottom:6px">
+        <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px">${t.t}</p>
+        <p style="font-size:11px;color:var(--color-text-secondary);margin:0">${t.d}</p>
+      </div>`;
+    });
+    html += `<div class="code">${ch.code.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>').replace(/ {4}/g,'&nbsp;&nbsp;&nbsp;&nbsp;')}</div>`;
+  }
+
+  if (ch.id === 6) {
+    html += `<div class="code">${ch.code.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>').replace(/ {4}/g,'&nbsp;&nbsp;&nbsp;&nbsp;')}</div>`;
+  }
+
+  html += `
+    <div style="background:${ch.bg};border:0.5px solid ${ch.border};border-radius:8px;padding:9px 12px;margin-top:10px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:14px">🎯</span>
+      <div><p style="font-size:11px;font-weight:500;color:${ch.color};margin:0 0 1px">Entrega deste capítulo</p>
+      <p style="font-size:12px;color:var(--color-text-primary);margin:0">${ch.entrega}</p></div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+      ${ch.refs.map(r => `<span style="font-size:11px;padding:2px 8px;border-radius:4px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary)">${r}</span>`).join('')}
+    </div>
+  </div>`;
+
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+    <button class="nav-btn" onclick="show(${current-1})" ${current===0?'style="opacity:.3;pointer-events:none"':''}>← Anterior</button>
+    <span style="font-size:11px;color:var(--color-text-tertiary)">${current+1} / ${chapters.length}</span>
+    <button class="nav-btn" onclick="show(${current+1})" ${current===chapters.length-1?'style="opacity:.3;pointer-events:none"':''}>Próximo →</button>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+function show(i) {
+  if (i < 0 || i >= chapters.length) return;
+  current = i;
+  renderNav();
+  renderContent();
+}
+
+show(0);
+</script>
